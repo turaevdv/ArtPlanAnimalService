@@ -1,6 +1,9 @@
 package ru.turaev.animalservice.config;
 
+import com.netflix.discovery.EurekaClient;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,7 +15,11 @@ import ru.turaev.animalservice.service.impl.AuthorizationServiceImpl;
 @Configuration
 @RequiredArgsConstructor
 public class SpringConfig {
-    private static final String BASE_URL = "http://localhost:8081/userservice/api";
+    @Autowired
+    private EurekaClient eurekaClient;
+
+    @Value("${user-service.name}")
+    private String userServiceName;
 
     @Bean
     public FilterRegistrationBean<JwtTokenFilter> jwtFilter() {
@@ -25,8 +32,12 @@ public class SpringConfig {
 
     @Bean
     public WebClient webClient() {
+        String path = eurekaClient
+                .getApplication(userServiceName)
+                .getInstances().get(0)
+                .getHomePageUrl() + "/userservice/api";
         return WebClient.builder()
-                .baseUrl(BASE_URL)
+                .baseUrl(path)
                 .build();
     }
 
