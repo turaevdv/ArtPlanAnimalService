@@ -20,7 +20,7 @@ public class JwtTokenFilter extends GenericFilterBean {
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
         String token = ((HttpServletRequest) servletRequest).getHeader(HEADER);
-        if (token.isBlank()) {
+        if (token == null || token.isBlank()) {
             throw new AuthenticationException("Token not found");
         }
         if (!authorizationService.isTokenValid(token)) {
